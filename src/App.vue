@@ -12,6 +12,8 @@
           :newTasks="statusCard.newTasks"
           :status="statusCard.status"
           :tasks="filteredTasks(statusCard.status)"
+          @new-task="addTask"
+          @status-updated="updateStatus"
         />
       </div>
     </div>
@@ -20,10 +22,19 @@
 
 <script>
 import StatusCard from "./components/StatusCard.vue";
+import logger from "./mixins/logger";
 export default {
   name: "App",
+  mixins: [
+    logger,
+  ],
   components: {
     StatusCard,
+  },
+  provide() {
+    return {
+      maxNumberOfChars: 255,
+    }
   },
   data() {
     return {
@@ -69,15 +80,30 @@ export default {
   methods: {
     filteredTasks(status) {
       return this.tasks.filter((task) => task.status === status);
-    }
+    },
+    addTask(task) {
+      task.id = Math.random();
+      this.tasks.push(task);
+      this.writeLogEntry("Neue Aufgabe ausgeführt ...");
+    },
+    updateStatus(statusDO) {
+      console.log(statusDO);
+      const task = this.tasks.find(
+        (task) => task.id === Number(statusDO.taskId)
+      );
+      task.status = statusDO.newStatus;
+    },
   },
-  // computed: {
-  //   newTasks() {
-  //     return this.tasks.filter((task) => task.status === 0);
-  //   },
+  // mounted() {
+  //   console.log("Anwendung ist vollständig geladen");
   // },
-};
-</script>
+  // computed: {
+    //   newTasks() {
+      //     return this.tasks.filter((task) => task.status === 0);
+      //   },
+      // },
+    };
+  </script>
 
 <style>
 @import "~bootstrap/dist/css/bootstrap.min.css";
